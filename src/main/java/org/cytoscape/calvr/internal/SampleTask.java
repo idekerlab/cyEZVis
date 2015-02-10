@@ -1,6 +1,8 @@
 package org.cytoscape.calvr.internal;
 
 
+import java.io.IOException;
+
 import org.cytoscape.task.AbstractNetworkViewTask;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskMonitor;
@@ -16,13 +18,19 @@ public class SampleTask extends AbstractNetworkViewTask {
 
 	public SampleTask(final CyNetworkView view) {
 		super(view);
-		this.converter = new NetworkViewConverter();
+		try {
+			this.converter = new NetworkViewConverter();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new IllegalArgumentException("Could not create converter.", e);
+		}
 	}
 
 	public void run(final TaskMonitor taskMonitor) throws Exception {
 		// Give the task a title.
 		taskMonitor.setTitle("Sending data to CalVR server...");
 		
-		converter.send();
+		converter.send(view);
 	}
 }
