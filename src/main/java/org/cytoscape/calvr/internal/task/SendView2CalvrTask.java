@@ -1,27 +1,24 @@
-package org.cytoscape.calvr.internal;
+package org.cytoscape.calvr.internal.task;
 
 
 import java.io.IOException;
 
+import org.cytoscape.calvr.internal.NetworkViewConverter;
 import org.cytoscape.task.AbstractNetworkViewTask;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskMonitor;
 import org.cytoscape.work.Tunable;
 
-public class SampleTask extends AbstractNetworkViewTask {
+public class SendView2CalvrTask extends AbstractNetworkViewTask {
 
-	@Tunable(description="Message to Mugic:")
-	public String numNodesToSelect;
-	
 	private final NetworkViewConverter converter;
 
 
-	public SampleTask(final CyNetworkView view) {
+	public SendView2CalvrTask(final CyNetworkView view) {
 		super(view);
 		try {
 			this.converter = new NetworkViewConverter();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new IllegalArgumentException("Could not create converter.", e);
 		}
@@ -32,5 +29,7 @@ public class SampleTask extends AbstractNetworkViewTask {
 		taskMonitor.setTitle("Sending data to CalVR server...");
 		
 		converter.send(view);
+		
+		taskMonitor.setProgress(1.0);
 	}
 }

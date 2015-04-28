@@ -14,11 +14,22 @@
 
 	<groupId>org.cytoscape</groupId>
 	<artifactId>mugic</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
 	<packaging>bundle</packaging>
 	<name>mugic</name>
 
 	<repositories>
+		<repository>
+			<id>central</id>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<name>Releases</name>
+			<url>http://repo1.maven.org/maven2/</url>
+		</repository>
 		<repository>
 			<id>cytoscape_releases</id>
 			<snapshots>
@@ -31,14 +42,7 @@
 			<url>http://code.cytoscape.org/nexus/content/repositories/releases/</url>
 		</repository>
 	</repositories>
-
-
-	<!-- SCM Information. Currently hosted at GitHub. -->
-<!-- 	<scm>
-		<connection>scm:https://github.com/idekerlab/cyREST.git</connection>
-		<developerConnection>scm:git@github.com:idekerlab/cyREST.git</developerConnection>
-	</scm> -->
-
+	
 	<build>
 		<plugins>
 			<plugin>
