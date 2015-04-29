@@ -1,11 +1,14 @@
 package org.cytoscape.calvr.internal;
 
-public enum MugicShape {
-	Circle("circle");
+/**
+ * Shapes supported in EZVis
+ */
+public enum EzvisShape {
+	Circle("circle"), Rectangle("rectangle");
 	
 	private final String name;
 	
-	private MugicShape(final String name) {
+	private EzvisShape(final String name) {
 		this.name = name;
 	}
 	

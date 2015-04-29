@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
+import org.cytoscape.property.CyProperty;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.View;
 import org.cytoscape.view.presentation.property.BasicVisualLexicon;
@@ -23,8 +25,14 @@ public class NetworkViewConverter {
 	
 	private static final Double OFFSET = 5.0; 
 	
+	final CyProperty<Properties> props;
+	
+	public NetworkViewConverter(final CyProperty<Properties> props) {
+		this.props = props;
+	}
+	
 	public final void convert(final CyNetworkView view) throws IOException {
-		final PacketSender sender = new PacketSender();
+		final PacketSender sender = new PacketSender(props);
 		
 		final CyNetwork network = view.getModel();
 		final Collection<View<CyNode>> nodeViews = view.getNodeViews();
@@ -82,7 +90,7 @@ public class NetworkViewConverter {
 	 */
 	private final String node2sahpe(final View<CyNode> nv, final CyNetwork network) {
 		
-		final String shape = MugicShape.Circle.getName();
+		final String shape = EzvisShape.Circle.getName();
 		
 		// Extract basic node view information
 		final Double x = nv.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);

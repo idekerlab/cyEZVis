@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<properties>
-		<bundle.symbolicName>org.cytoscape.calvr.mugic</bundle.symbolicName>
+		<bundle.symbolicName>org.cytoscape.calvr.ezvis</bundle.symbolicName>
 		<bundle.namespace>org.cytoscape.calvr</bundle.namespace>
 		<maven-compiler-plugin.version>3.2</maven-compiler-plugin.version>
 		<osgi.api.version>4.2.0</osgi.api.version>
@@ -13,10 +13,10 @@
 	</properties>
 
 	<groupId>org.cytoscape</groupId>
-	<artifactId>mugic</artifactId>
-	<version>0.1.1</version>
+	<artifactId>ezvis</artifactId>
+	<version>0.1.2</version>
 	<packaging>bundle</packaging>
-	<name>mugic</name>
+	<name>ezvis</name>
 
 	<repositories>
 		<repository>

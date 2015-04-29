@@ -1,4 +1,4 @@
-# cyMugic Cytoscape App
+# cyEZVis Cytoscape App
 
 ![](http://cl.ly/anma/calvr-yeast-network.png)
 
@@ -11,7 +11,7 @@ This is a simple [Cytoscape](http://www.cytoscape.org/) App to send Cytoscape ne
 ## Documents
 All documents are available in our wiki:
 
-* [cyMugic Wiki](https://github.com/idekerlab/cyMugic/wiki)
+* [cyEZVis Wiki](https://github.com/idekerlab/cyMugic/wiki)
 
 ----
 

@@ -1,7 +1,10 @@
 package org.cytoscape.calvr.internal.task;
 
 
+import java.util.Properties;
+
 import org.cytoscape.calvr.internal.NetworkViewConverter;
+import org.cytoscape.property.CyProperty;
 import org.cytoscape.task.AbstractNetworkViewTask;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.work.TaskMonitor;
@@ -10,10 +13,9 @@ public class SendView2CalvrTask extends AbstractNetworkViewTask {
 
 	private final NetworkViewConverter converter;
 
-
-	public SendView2CalvrTask(final CyNetworkView view) {
+	public SendView2CalvrTask(final CyNetworkView view, final CyProperty<Properties> props) {
 		super(view);
-		this.converter = new NetworkViewConverter();
+		this.converter = new NetworkViewConverter(props);
 	}
 
 	public void run(final TaskMonitor taskMonitor) throws Exception {
