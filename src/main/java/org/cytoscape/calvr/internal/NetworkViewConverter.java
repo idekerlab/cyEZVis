@@ -88,8 +88,9 @@ public class NetworkViewConverter {
 		final Double x = nv.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
 		final Double y = nv.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
 		
-		final Double size = nv.getVisualProperty(BasicVisualLexicon.NODE_SIZE);
-		final Double radius = size/2.0;
+		final Double width = nv.getVisualProperty(BasicVisualLexicon.NODE_WIDTH);
+		final Double height = nv.getVisualProperty(BasicVisualLexicon.NODE_HEIGHT);
+		final Double radius = width/2.0;
 		final Color color = (Color) nv.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
 		final Double alpha = nv.getVisualProperty(BasicVisualLexicon.NODE_TRANSPARENCY)/255.0;
 		
