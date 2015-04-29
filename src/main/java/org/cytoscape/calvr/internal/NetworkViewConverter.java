@@ -3,9 +3,10 @@ package org.cytoscape.calvr.internal;
 import java.awt.Color;
 import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.cytoscape.model.CyEdge;
 import org.cytoscape.model.CyNetwork;
@@ -20,44 +21,34 @@ import org.cytoscape.view.presentation.property.BasicVisualLexicon;
  */
 public class NetworkViewConverter {
 	
-	// TODO Create properties for these 
-	private static final int PORT_NUMBER = 19997;
-	private static final String IP = "127.0.0.1";
-
-	private final DatagramSocket socket;
-	private final InetAddress address;
+	private static final Double OFFSET = 5.0; 
 	
-	public NetworkViewConverter() throws IOException {
-		this.socket = new DatagramSocket();
-		this.address = InetAddress.getByName(IP);
-	}
-
-	public void send(final CyNetworkView view) throws IOException {
-
-		convert(view);
+	public final void convert(final CyNetworkView view) throws IOException {
+		final PacketSender sender = new PacketSender();
 		
-		System.out.println("Done!");
-		socket.close();
-	}
-	
-	private final void convert(final CyNetworkView view) {
 		final CyNetwork network = view.getModel();
-		
-		// Send node data
 		final Collection<View<CyNode>> nodeViews = view.getNodeViews();
-		nodeViews.stream().forEach(nv->node2sahpe(nv, network));
+		final Collection<View<CyEdge>> edgeViews = view.getEdgeViews();
 
 		// Send Edge Data
-		final Collection<View<CyEdge>> edgeViews = view.getEdgeViews();
-		edgeViews.stream().forEach(ev->edge2line(ev, view));
+		final List<String> edgeStrList = edgeViews.stream()
+				.map(ev->edge2line(ev, view))
+				.collect(Collectors.toList());
+		sender.send(edgeStrList);
+		
+		// Send node data
+		final List<String> nodeStrList = nodeViews.stream()
+			.map(nv->node2sahpe(nv, network))
+			.collect(Collectors.toList());
+		sender.send(nodeStrList);
+		
+		sender.close();
 	}
 	
-	private final void edge2line(final View<CyEdge> ev, final CyNetworkView view) {
-		
+	private final String edge2line(final View<CyEdge> ev, final CyNetworkView view) {
 		final CyEdge edge = ev.getModel();
 		final View<CyNode> sourceView = view.getNodeView(edge.getSource());
 		final View<CyNode> targetView = view.getNodeView(edge.getTarget());
-		
 		
 		// Extract basic node view information
 		final Double x1 = sourceView.getVisualProperty(BasicVisualLexicon.NODE_X_LOCATION);
@@ -73,39 +64,23 @@ public class NetworkViewConverter {
 		
 		String name = ev.getSUID().toString();
 		
-		final String evs = "line " + name + " x1=" + x1 + " z1=" + (-y1) + " x2=" + x2 + " z2=" + (-y2) +
+		final String evs = "line " + name + " pos1=" + x1 + ",0," + (-y1) + 
+				" pos2=" + x2 + ",0," + (-y2) +
 				" width=" + width + " " + decodeColor(color, alpha);
+		
 		System.out.println(evs);
 		
-		byte[] buf = evs.getBytes();
-		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, PORT_NUMBER);
-		try {
-			socket.send(packet);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		return evs;
 	}
-	
-	private final String decodeColor(final Color color, final Double alpha) {
-		final double r = color.getRed()/255.0;
-		final double g = color.getGreen()/255.0;
-		final double b = color.getBlue()/255.0;
-		
-		final String colorStr = "r1=" + r + " g1=" + g + " b1=" + b + " a1=" + alpha +
-								" r2=" + r + " g2=" + g + " b2=" + b + " a2=" + alpha;
-		return colorStr;
-	}
-	
-	
+
+
 	/**
 	 * Convert node view object to simple MUGIC primitive
 	 * 
 	 * @param nv Node view
 	 * @param network 
 	 */
-	private final void node2sahpe(final View<CyNode> nv, final CyNetwork network) {
+	private final String node2sahpe(final View<CyNode> nv, final CyNetwork network) {
 		
 		final String shape = MugicShape.Circle.getName();
 		
@@ -114,24 +89,40 @@ public class NetworkViewConverter {
 		final Double y = nv.getVisualProperty(BasicVisualLexicon.NODE_Y_LOCATION);
 		
 		final Double size = nv.getVisualProperty(BasicVisualLexicon.NODE_SIZE);
+		final Double radius = size/2.0;
 		final Color color = (Color) nv.getVisualProperty(BasicVisualLexicon.NODE_FILL_COLOR);
 		final Double alpha = nv.getVisualProperty(BasicVisualLexicon.NODE_TRANSPARENCY)/255.0;
 		
-		String name = network.getRow(nv.getModel()).get(CyNetwork.NAME, String.class);
-		String kegg = network.getRow(nv.getModel()).get("KEGG_NODE_LABEL_LIST_FIRST", String.class);
+		// Label Text data
+		final String name = network.getRow(nv.getModel()).get(CyNetwork.NAME, String.class) + "-" + nv.getModel().getSUID();
+		final String label = nv.getVisualProperty(BasicVisualLexicon.NODE_LABEL);
+		final Integer labelSize = nv.getVisualProperty(BasicVisualLexicon.NODE_LABEL_FONT_SIZE);
+		final Double labelX = x - (radius/2.0);
+		final Double labelY = y + radius + labelSize + OFFSET;
+		final Color labelColor = (Color) nv.getVisualProperty(BasicVisualLexicon.NODE_LABEL_COLOR);
+		final Double labelAlpha = nv.getVisualProperty(BasicVisualLexicon.NODE_LABEL_TRANSPARENCY).doubleValue();
 		
-		final String nvs = shape + " " + name + " x=" + x + " z=" + (-y) + 
-				" radius=" + size + " " + decodeColor(color, alpha);
-//						+ "text " + name + "-label label=" + name + " size=3 x=" + x + " z=" + (-y -25) + " y=-5 rgba=1,1,1,0.5";
+		final String nvs = shape + " " + name + " pos=" + x + ",-0.1," + (-y) + 
+				" radius=" + radius + " " + decodeColor(color, alpha) + 
+				"; text label-" + nv.getModel().getSUID() + 
+				" label=\"" + label + "\" pos=" + 
+				labelX + ",0," + (-labelY) + 
+				" size=" + labelSize + 
+				" " + decodeColor(labelColor, labelAlpha) + 
+				" enableOutline=0";
+		
 		System.out.println(nvs);
 		
-		byte[] buf = nvs.getBytes();
-		DatagramPacket packet = new DatagramPacket(buf, buf.length, address, PORT_NUMBER);
-		try {
-			socket.send(packet);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		return nvs;
+	}
+
+
+	private final String decodeColor(final Color color, final Double alpha) {
+		final double r = color.getRed()/255.0;
+		final double g = color.getGreen()/255.0;
+		final double b = color.getBlue()/255.0;
+		
+		final String colorStr = "color=" + r + "," + g + "," + b + "," + alpha;
+		return colorStr;
 	}
 }
